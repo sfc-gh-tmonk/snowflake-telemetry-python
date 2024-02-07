@@ -27,7 +27,6 @@ setup(
         "opentelemetry-sdk == 1.12.0",
         "opentelemetry-proto == 1.12.0",
     ],
-    namespace_packages=["snowflake"],
     packages=find_namespace_packages(
         where='src'
     ),
