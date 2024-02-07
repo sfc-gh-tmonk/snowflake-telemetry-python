@@ -4,4 +4,4 @@
 #
 
 """Update this for the versions."""
-VERSION = (0, 2, 0)
+VERSION = (0, 2, 1)

@@ -25,7 +25,7 @@ from opentelemetry.sdk.metrics import (
     ObservableUpDownCounter,
     UpDownCounter,
 )
-from opentelemetry.exporter.otlp.proto.common._internal import (
+from snowflake.telemetry._internal.opentelemetry.exporter.otlp.proto.common._internal import (
     _encode_attributes,
 )
 from opentelemetry.sdk.environment_variables import (
@@ -44,17 +44,12 @@ from opentelemetry.sdk.metrics.export import (
     Gauge,
     Histogram as HistogramType,
     Sum,
-    ExponentialHistogram as ExponentialHistogramType,
 )
 from typing import Dict
 from opentelemetry.proto.resource.v1.resource_pb2 import (
     Resource as PB2Resource,
 )
-from opentelemetry.sdk.environment_variables import (
-    OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION,
-)
 from opentelemetry.sdk.metrics.view import (
-    ExponentialBucketHistogramAggregation,
     ExplicitBucketHistogramAggregation,
 )
 
@@ -119,33 +114,7 @@ class OTLPMetricExporterMixin:
 
         instrument_class_temporality.update(preferred_temporality or {})
 
-        otel_exporter_otlp_metrics_default_histogram_aggregation = environ.get(
-            OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION,
-            "explicit_bucket_histogram",
-        )
-
-        if otel_exporter_otlp_metrics_default_histogram_aggregation == (
-            "base2_exponential_bucket_histogram"
-        ):
-
-            histogram_aggregation_type = ExponentialBucketHistogramAggregation
-
-        else:
-
-            if otel_exporter_otlp_metrics_default_histogram_aggregation != (
-                "explicit_bucket_histogram"
-            ):
-
-                _logger.warning(
-                    (
-                        "Invalid value for %s: %s, using explicit bucket "
-                        "histogram aggregation"
-                    ),
-                    OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION,
-                    otel_exporter_otlp_metrics_default_histogram_aggregation,
-                )
-
-            histogram_aggregation_type = ExplicitBucketHistogramAggregation
+        histogram_aggregation_type = ExplicitBucketHistogramAggregation
 
         MetricExporter.__init__(
             self,
@@ -249,48 +218,6 @@ def encode_metrics(data: MetricsData) -> ExportMetricsServiceRequest:
                         )
                         pb2_metric.sum.is_monotonic = metric.data.is_monotonic
                         pb2_metric.sum.data_points.append(pt)
-
-                elif isinstance(metric.data, ExponentialHistogramType):
-                    for data_point in metric.data.data_points:
-
-                        if data_point.positive.bucket_counts:
-                            positive = pb2.ExponentialHistogramDataPoint.Buckets(
-                                offset=data_point.positive.offset,
-                                bucket_counts=data_point.positive.bucket_counts,
-                            )
-                        else:
-                            positive = None
-
-                        if data_point.negative.bucket_counts:
-                            negative = pb2.ExponentialHistogramDataPoint.Buckets(
-                                offset=data_point.negative.offset,
-                                bucket_counts=data_point.negative.bucket_counts,
-                            )
-                        else:
-                            negative = None
-
-                        pt = pb2.ExponentialHistogramDataPoint(
-                            attributes=_encode_attributes(
-                                data_point.attributes
-                            ),
-                            time_unix_nano=data_point.time_unix_nano,
-                            start_time_unix_nano=(
-                                data_point.start_time_unix_nano
-                            ),
-                            count=data_point.count,
-                            sum=data_point.sum,
-                            scale=data_point.scale,
-                            zero_count=data_point.zero_count,
-                            positive=positive,
-                            negative=negative,
-                            flags=data_point.flags,
-                            max=data_point.max,
-                            min=data_point.min,
-                        )
-                        pb2_metric.exponential_histogram.aggregation_temporality = (
-                            metric.data.aggregation_temporality
-                        )
-                        pb2_metric.exponential_histogram.data_points.append(pt)
 
                 else:
                     _logger.warning(

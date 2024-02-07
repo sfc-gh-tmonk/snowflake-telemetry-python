@@ -14,7 +14,7 @@
 from collections import defaultdict
 from typing import Sequence, List
 
-from opentelemetry.exporter.otlp.proto.common._internal import (
+from snowflake.telemetry._internal.opentelemetry.exporter.otlp.proto.common._internal import (
     _encode_instrumentation_scope,
     _encode_resource,
     _encode_span_id,
@@ -47,7 +47,6 @@ def _encode_log(log_data: LogData) -> PB2LogRecord:
         body=_encode_value(log_data.log_record.body),
         severity_text=log_data.log_record.severity_text,
         attributes=_encode_attributes(log_data.log_record.attributes),
-        dropped_attributes_count=log_data.log_record.dropped_attributes,
         severity_number=log_data.log_record.severity_number.value,
     )
 

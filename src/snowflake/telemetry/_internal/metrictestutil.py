@@ -39,8 +39,13 @@ def _generate_metric(
 
 
 def _generate_sum(
-    name, value, attributes=None, description=None, unit=None
-) -> Sum:
+    name,
+    value,
+    attributes=None,
+    description=None,
+    unit=None,
+    is_monotonic=True,
+) -> Metric:
     if attributes is None:
         attributes = BoundedAttributes(attributes={"a": 1, "b": True})
     return _generate_metric(
@@ -55,7 +60,7 @@ def _generate_sum(
                 )
             ],
             aggregation_temporality=AggregationTemporality.CUMULATIVE,
-            is_monotonic=True,
+            is_monotonic=is_monotonic,
         ),
         description=description,
         unit=unit,
@@ -64,7 +69,7 @@ def _generate_sum(
 
 def _generate_gauge(
     name, value, attributes=None, description=None, unit=None
-) -> Gauge:
+) -> Metric:
     if attributes is None:
         attributes = BoundedAttributes(attributes={"a": 1, "b": True})
     return _generate_metric(
@@ -86,7 +91,7 @@ def _generate_gauge(
 
 def _generate_unsupported_metric(
     name, attributes=None, description=None, unit=None
-) -> Sum:
+) -> Metric:
     return _generate_metric(
         name,
         None,

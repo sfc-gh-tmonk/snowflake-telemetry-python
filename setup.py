@@ -1,6 +1,8 @@
 import os
-from setuptools import setup
-
+from setuptools import (
+    find_namespace_packages,
+    setup,
+)
 
 DESCRIPTION = 'Snowflake Telemetry Python'
 LONG_DESCRIPTION = 'This package provides a set of telemetry APIs for use in Snowflake'
@@ -21,14 +23,14 @@ setup(
     long_description=LONG_DESCRIPTION,
     install_requires=[
         "setuptools >= 40.0.0",
-        "opentelemetry-sdk == 1.12.0",
         "opentelemetry-api == 1.12.0",
-        "opentelemetry-exporter-otlp == 1.12.0",
+        "opentelemetry-sdk == 1.12.0",
+        "opentelemetry-proto == 1.12.0",
     ],
     namespace_packages=["snowflake"],
-    packages=[
-        "snowflake.telemetry",
-    ],
+    packages=find_namespace_packages(
+        where='src'
+    ),
     package_dir={
         "": "src",
     },

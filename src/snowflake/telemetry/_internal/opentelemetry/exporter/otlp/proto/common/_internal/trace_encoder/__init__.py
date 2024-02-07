@@ -16,7 +16,7 @@ import logging
 from collections import defaultdict
 from typing import List, Optional, Sequence
 
-from opentelemetry.exporter.otlp.proto.common._internal import (
+from snowflake.telemetry._internal.opentelemetry.exporter.otlp.proto.common._internal import (
     _encode_trace_id,
     _encode_span_id,
     _encode_instrumentation_scope,
